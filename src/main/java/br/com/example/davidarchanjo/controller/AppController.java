@@ -1,7 +1,8 @@
 package br.com.example.davidarchanjo.controller;
 
-import br.com.example.davidarchanjo.model.dto.AppDTO;
-import br.com.example.davidarchanjo.service.AppService;
+import br.com.example.davidarchanjo.model.dto.CustomerDTO;
+import br.com.example.davidarchanjo.model.domain.Customer;
+import br.com.example.davidarchanjo.service.CustomerService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -11,20 +12,21 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/api/v1/apps")
-public class AppController {
+@RequestMapping("/api/v1/customers")
+public class CustomerController {
 
-    private final AppService service;
+    private final CustomerService service;
 
     @PostMapping
-    public ResponseEntity<?> create(@Valid @RequestBody AppDTO dto, UriComponentsBuilder uriComponentsBuilder) {
-        Long appId = service.createNewApp(dto);
+    public ResponseEntity<?> createCustomer(@Valid @RequestBody CustomerDTO dto, UriComponentsBuilder uriComponentsBuilder) {
+        Long customerId = service.createCustomer(dto);
         UriComponents uriComponents = uriComponentsBuilder
-            .path("/api/v1/apps/{id}")
-            .buildAndExpand(appId);
+            .path("/api/v1/customers/{id}")
+            .buildAndExpand(customerId);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(uriComponents.toUri());
@@ -33,25 +35,45 @@ public class AppController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAll() {
-        return ResponseEntity.ok(service.getAllApps());
+    public ResponseEntity<List<CustomerDTO>> getAllCustomers() {
+        return ResponseEntity.ok(service.getAllCustomers());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(service.getAppById(id));
+    public ResponseEntity<?> getCustomerById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getCustomerById(id));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<CustomerDTO>> searchCustomersByName(@RequestParam String name) {
+        return ResponseEntity.ok(service.searchCustomersByName(name));
+    }
+
+    @GetMapping("/email/{email}")
+    public ResponseEntity<?> getCustomerByEmail(@PathVariable String email) {
+        return ResponseEntity.ok(service.getCustomerByEmail(email));
+    }
+
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<CustomerDTO>> getCustomersByStatus(@PathVariable Customer.CustomerStatus status) {
+        return ResponseEntity.ok(service.getCustomersByStatus(status));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody AppDTO dto) {
-        service.updateApp(id, dto);
+    public ResponseEntity<?> updateCustomer(@PathVariable Long id, @Valid @RequestBody CustomerDTO dto) {
+        service.updateCustomer(id, dto);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        service.deleteAppById(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> deleteCustomer(@PathVariable Long id) {
+        service.deleteCustomerById(id);
+        return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/populate")
+    public ResponseEntity<?> populateTestCustomers() {
+        service.populateTestCustomers();
+        return ResponseEntity.ok("Test customers created successfully");
+    }
 }

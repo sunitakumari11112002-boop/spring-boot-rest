@@ -1,42 +1,53 @@
 package br.com.example.davidarchanjo.service.impl;
 
-import br.com.example.davidarchanjo.builder.AppBuilder;
-import br.com.example.davidarchanjo.exception.AppNotFoundException;
-import br.com.example.davidarchanjo.model.domain.App;
-import br.com.example.davidarchanjo.model.dto.AppDTO;
-import br.com.example.davidarchanjo.repository.AppRepository;
-import br.com.example.davidarchanjo.service.AppService;
+import br.com.example.davidarchanjo.builder.CustomerBuilder;
+import br.com.example.davidarchanjo.exception.CustomerNotFoundException;
+import br.com.example.davidarchanjo.model.domain.Customer;
+import br.com.example.davidarchanjo.model.dto.CustomerDTO;
+import br.com.example.davidarchanjo.repository.CustomerRepository;
+import br.com.example.davidarchanjo.service.CustomerService;
 import com.github.javafaker.Faker;
 import lombok.AllArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 @Service
 @AllArgsConstructor
-public class AppServiceImpl implements AppService {
+public class CustomerServiceImpl implements CustomerService {
 
-    private final AppRepository repository;
-    private final AppBuilder builder;
+    private final CustomerRepository repository;
+    private final CustomerBuilder builder;
 
     @Override
-    public Long createNewApp(AppDTO dto) {
+    public Long createCustomer(CustomerDTO dto) {
+        // Check if email or NI number already exists
+        if (repository.existsByEmail(dto.getEmail())) {
+            throw new IllegalArgumentException("Customer with this email already exists");
+        }
+        if (repository.existsByNationalInsuranceNumber(dto.getNationalInsuranceNumber())) {
+            throw new IllegalArgumentException("Customer with this National Insurance Number already exists");
+        }
+
         return Stream.of(dto)
             .map(builder::build)
             .map(repository::save)
-            .map(App::getId)
+            .map(Customer::getCustomerId)
             .findFirst()
             .get();
     }
 
     @Override
-    public List<Optional<AppDTO>> getAllApps() {
+    public List<CustomerDTO> getAllCustomers() {
         return repository.findAll()
             .stream()
             .map(builder::build)
@@ -44,38 +55,85 @@ public class AppServiceImpl implements AppService {
     }
 
     @Override
-    public Optional<AppDTO> getAppById(Long id) {
-        return repository.findById(id)
+    public Optional<CustomerDTO> getCustomerById(Long customerId) {
+        return Optional.of(repository.findById(customerId)
             .map(builder::build)
-            .orElseThrow(() -> new AppNotFoundException(String.format("No such App for id '%s'", id)));
+            .orElseThrow(() -> new CustomerNotFoundException(String.format("No customer found for id '%s'", customerId))));
     }
 
     @Transactional
     @Override
-    public Optional<AppDTO> updateApp(Long id, AppDTO dto) {
-        return repository.findById(id)
+    public Optional<CustomerDTO> updateCustomer(Long customerId, CustomerDTO dto) {
+        return Optional.of(repository.findById(customerId)
             .map(model -> builder.build(dto, model))
             .map(repository::save)
             .map(builder::build)
-            .orElseThrow(() -> new AppNotFoundException(String.format("No such App for id '%s'", id)));
+            .orElseThrow(() -> new CustomerNotFoundException(String.format("No customer found for id '%s'", customerId))));
     }
 
     @Override
-    public void deleteAppById(Long id) {
-        repository.deleteById(id);
+    public void deleteCustomerById(Long customerId) {
+        if (!repository.existsById(customerId)) {
+            throw new CustomerNotFoundException(String.format("No customer found for id '%s'", customerId));
+        }
+        repository.deleteById(customerId);
     }
 
     @Override
-    public void populate() {
+    public List<CustomerDTO> searchCustomersByName(String name) {
+        return repository.findByNameContaining(name)
+            .stream()
+            .map(builder::build)
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<CustomerDTO> getCustomerByEmail(String email) {
+        return repository.findByEmail(email)
+            .map(builder::build);
+    }
+
+    @Override
+    public List<CustomerDTO> getCustomersByStatus(Customer.CustomerStatus status) {
+        return repository.findByStatus(status)
+            .stream()
+            .map(builder::build)
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public void populateTestCustomers() {
         val faker = new Faker();
-        IntStream.range(0, 100).forEach(i -> {
-            App app = App.builder()
-                .author(faker.app().author())
-                .name(faker.app().name())
-                .version(faker.app().version())
+        IntStream.range(0, 50).forEach(i -> {
+            Customer customer = Customer.builder()
+                .firstName(faker.name().firstName())
+                .lastName(faker.name().lastName())
+                .email(faker.internet().emailAddress())
+                .phoneNumber("+44" + faker.number().digits(10))
+                .dateOfBirth(faker.date().birthday(18, 80).toInstant()
+                    .atZone(ZoneId.systemDefault()).toLocalDate())
+                .address(faker.address().fullAddress())
+                .postcode(generateUKPostcode(faker))
+                .nationalInsuranceNumber(generateNINumber(faker))
+                .status(Customer.CustomerStatus.ACTIVE)
+                .createdAt(LocalDateTime.now())
                 .build();
 
-            repository.save(app);
+            repository.save(customer);
         });
+    }
+
+    private String generateUKPostcode(Faker faker) {
+        String[] areas = {"SW", "NW", "SE", "NE", "E", "W", "N", "S", "EC", "WC"};
+        String area = areas[faker.random().nextInt(areas.length)];
+        return area + faker.number().numberBetween(1, 20) + " " +
+               faker.number().numberBetween(1, 9) +
+               faker.regexify("[A-Z]{2}");
+    }
+
+    private String generateNINumber(Faker faker) {
+        return faker.regexify("[A-Z]{2}") +
+               faker.number().digits(6) +
+               faker.regexify("[A-Z]");
     }
 }

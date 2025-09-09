@@ -3,19 +3,26 @@ package br.com.example.davidarchanjo.service;
 import java.util.List;
 import java.util.Optional;
 
-import br.com.example.davidarchanjo.model.dto.AppDTO;
+import br.com.example.davidarchanjo.model.dto.CustomerDTO;
+import br.com.example.davidarchanjo.model.domain.Customer;
 
-public interface AppService {
+public interface CustomerService {
 
-    Long createNewApp(AppDTO dto);
+    Long createCustomer(CustomerDTO dto);
 
-    List<Optional<AppDTO>> getAllApps();
+    List<CustomerDTO> getAllCustomers();
 
-    Optional<AppDTO> getAppById(Long id);
+    Optional<CustomerDTO> getCustomerById(Long customerId);
 
-    Optional<AppDTO> updateApp(Long id, AppDTO dto);
+    Optional<CustomerDTO> updateCustomer(Long customerId, CustomerDTO dto);
 
-    void deleteAppById(Long id);
+    void deleteCustomerById(Long customerId);
 
-    void populate();
+    List<CustomerDTO> searchCustomersByName(String name);
+
+    Optional<CustomerDTO> getCustomerByEmail(String email);
+
+    List<CustomerDTO> getCustomersByStatus(Customer.CustomerStatus status);
+
+    void populateTestCustomers();
 }

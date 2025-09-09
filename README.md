@@ -1,143 +1,215 @@
-# Spring Boot CRUD Application 
+# Spring Boot Banking REST API 🏦
 ![banner](./assets/banner.jpg)
 
 ## Introduction
 
-### Spring Boot
-[Spring Boot](https://spring.io/projects/spring-boot) is one of the most famous [Spring](https://spring.io/projects/spring-framework) project used nowadays. It came to facilitate the process of configuring and publishing enterprise applications. It helps create stand-alone, production-grade Spring based applications with minimal effort. **Spring Boot** was conceived to be an "opinionated framework" because it follows an opinionated default configuration approach which reduces the developer efforts configuring the application.
+### About This Banking System
+This is a comprehensive **Spring Boot** REST API designed specifically for UK financial services companies. The system provides core banking functionalities including customer management, account operations, and transaction processing, all compliant with UK banking standards and regulations.
 
-Each application built using **Spring Boot** needs merely to define a Java class annotated with `@SpringBootApplication` as its main entry point. This annotation encapsulates the following other annotations:
-- `@Configuration` – marks the class as a source of bean definitions.
-- `@EnableAutoConfiguration` – indicates to the framework to add beans based on the dependencies on the classpath automatically.
-- `@ComponentScan` – scans for other configurations and beans in the same package as the Application class or below.
+### Key Banking Features
+- **Customer Management**: Complete CRUD operations for customer data with UK-specific validations
+- **Account Operations**: Support for multiple account types (Current, Savings, ISA, Business, Joint)
+- **Transaction Processing**: Secure transaction handling with real-time balance updates
+- **UK Compliance**: Validation for UK phone numbers, postcodes, and National Insurance numbers
+- **Audit Trail**: Complete transaction history and audit logging
+- **Security**: Account freezing, transaction limits, and fraud prevention measures
 
-### CRUD Application
-The most common way to start using **Spring Boot** is by implementing a CRUD (a.k.a **C**reate, **R**ead, **U**pdate, **D**elete) REST application. I particularly consider it a "Hello World" when it comes to microservice frameworks, because most of what it is used for is related to building APIs. ***A CRUD application essentially contains the very basic functionalities that every API could have.***
-
+### Banking Domain Entities
+- **Customer**: UK residents with validated personal information
+- **Bank Account**: Various account types with UK sort codes and account numbers
+- **Transaction**: Comprehensive transaction records with multiple transaction types
 
 ## Project Structure
-When working with **Spring Boot** projects there is no constrained package structure and the actual structure will be driven by your requirement. However, for convenience and simplicity's sake, the structure of this sample project is organized, not totally though, by following the MVC (a.k.a. **M**odel **V**iew **C**ontroller) Pattern. You can find more details about this pattern [here](https://examples.javacodegeeks.com/spring-mvc-architecture-overview-example/).
+This banking system follows the **MVC (Model View Controller)** pattern with additional service and repository layers for clean architecture:
 
-The following are the base folders in which the project is organized and the purpose of each:
-- [📁 application](src/main/java/br/com/example/davidarchanjo/application): contains the main class, annotated with `@SpringBootApplication`, which is responsible for booting up the application;
-- [📁 builder](src/main/java/br/com/example/davidarchanjo/builder): contains utility class responsible for converting entity to DTO (a.k.a. **D**ata **T**ransfer **O**bject) and vice-versa;
-- [📁 config](src/main/java/br/com/example/davidarchanjo/config): contain definition of beans through Spring configuration classes annotated with `@Configuration`;
-- [📁 controller](src/main/java/br/com/example/davidarchanjo/controller): contain classes annotated with `@Controller` responsible for processing incoming REST API requests;
-- [📁 exception](src/main/java/br/com/example/davidarchanjo/exception): contain custom exceptions for handling specific data consistent and/or business rule violations;
-- [📁 domain](src/main/java/br/com/example/davidarchanjo/model/domain): contain POJO classes (a.k.a. **P**lain **O**ld **J**ava **O**bject) annotated with `@Entity` representing database entities i.e., classes mapping database tables;
-- [📁 dto](src/main/java/br/com/example/davidarchanjo/model/dto): contain DTO classes which are used as objects that pass through architectural boundaries to transfer data; 
-- [📁 repository](src/main/java/br/com/example/davidarchanjo/repository): contain classes annotated with `@Repository` responsible for providing the mechanism for storage, retrieval, search, update and delete operation on objects usually present in a database;
-- [📁 service](src/main/java/br/com/example/davidarchanjo/service): contains class annotated with `@Service` in which business logic is implemented;
-
+- [📁 application](src/main/java/br/com/example/davidarchanjo/application): Main Spring Boot application entry point
+- [📁 builder](src/main/java/br/com/example/davidarchanjo/builder): Entity-DTO conversion utilities for banking objects
+- [📁 config](src/main/java/br/com/example/davidarchanjo/config): Spring configuration classes and beans
+- [📁 controller](src/main/java/br/com/example/davidarchanjo/controller): REST API endpoints for banking operations
+- [📁 exception](src/main/java/br/com/example/davidarchanjo/exception): Banking-specific exceptions and error handling
+- [📁 domain](src/main/java/br/com/example/davidarchanjo/model/domain): Banking entities (Customer, BankAccount, Transaction)
+- [📁 dto](src/main/java/br/com/example/davidarchanjo/model/dto): Data transfer objects for API operations
+- [📁 repository](src/main/java/br/com/example/davidarchanjo/repository): Data access layer with banking-specific queries
+- [📁 service](src/main/java/br/com/example/davidarchanjo/service): Business logic for banking operations
 
 ## Prerequisites
 - Maven 3+
 - Java 8+
 
-
 ## Libraries and Dependencies
-- [Spring Web](https://docs.spring.io/spring-framework/docs/current/reference/html/web.html)
-- [Spring Data JPA](https://spring.io/projects/spring-data-jpa)
-- [JUnit 5](https://junit.org/junit5/)
-- [Mockito](https://site.mockito.org/)
-- [Hamcrest](http://hamcrest.org/)
-- [H2 Database](https://www.h2database.com/html/main.html)
-- [Lombok](https://projectlombok.org/)
-- [ModelMapper](http://modelmapper.org/)
-- [JavaFaker](https://github.com/DiUS/java-faker)
+- [Spring Web](https://docs.spring.io/spring-framework/docs/current/reference/html/web.html) - REST API framework
+- [Spring Data JPA](https://spring.io/projects/spring-data-jpa) - Database operations
+- [Spring Validation](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#validation) - UK-compliant data validation
+- [JUnit 5](https://junit.org/junit5/) - Testing framework
+- [Mockito](https://site.mockito.org/) - Mocking framework
+- [H2 Database](https://www.h2database.com/html/main.html) - In-memory database
+- [Lombok](https://projectlombok.org/) - Boilerplate code reduction
+- [ModelMapper](http://modelmapper.org/) - Object mapping
+- [JavaFaker](https://github.com/DiUS/java-faker) - UK-compliant test data generation
 
+## Banking API Endpoints
 
-## The Sample Project
-This sample project implementes an API to manage applications produced by a fictitious software company. For each application release, its name, version and developer are registered. An H2 in-memory database is being used, but you can easily set up a real database if you like. For instance, to configure a MySQL database you'd only need to do the following two steps:
+### Customer Management
+- `POST /api/v1/customers` - Create new customer
+- `GET /api/v1/customers` - Get all customers
+- `GET /api/v1/customers/{id}` - Get customer by ID
+- `GET /api/v1/customers/search?name={name}` - Search customers by name
+- `GET /api/v1/customers/email/{email}` - Get customer by email
+- `GET /api/v1/customers/status/{status}` - Get customers by status
+- `PUT /api/v1/customers/{id}` - Update customer
+- `DELETE /api/v1/customers/{id}` - Delete customer
+- `POST /api/v1/customers/populate` - Generate test customers
 
-1. Add MySQL dependency to [pom.xml](./pom.xml)
-````xml
-<dependency>
-    <groupId>mysql</groupId>
-    <artifactId>mysql-connector-java</artifactId>
-    <scope>runtime</scope>
-</dependency>
-````
+### Account Management
+- `POST /api/v1/accounts` - Create new bank account
+- `GET /api/v1/accounts` - Get all accounts
+- `GET /api/v1/accounts/{id}` - Get account by ID
+- `GET /api/v1/accounts/customer/{customerId}` - Get customer accounts
+- `GET /api/v1/accounts/search?accountNumber={number}&sortCode={code}` - Find account
+- `GET /api/v1/accounts/{id}/balance` - Get account balance
+- `GET /api/v1/accounts/low-balance?threshold={amount}` - Get low balance accounts
+- `PUT /api/v1/accounts/{id}` - Update account
+- `PATCH /api/v1/accounts/{id}/freeze` - Freeze account
+- `PATCH /api/v1/accounts/{id}/unfreeze` - Unfreeze account
+- `DELETE /api/v1/accounts/{id}` - Close account
+- `POST /api/v1/accounts/populate` - Generate test accounts
 
-2. Add MySQL connection properties to [application.yml](./src/main/resources/application.yml)
-````yaml
-spring:
-  datasource:
-    driverClassName: com.mysql.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/apps_database?useSSL=false
-    username: root
-    password: root
-  jpa:
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
-    hibernate:
-      ddl-auto: update
-````
-**NOTE:** By default, **Spring Boot** configures the application to connect to H2 database with the username `sa` and an empty password when finding H2 connector dependency in the classpath.
+### Transaction Processing
+- `POST /api/v1/transactions` - Process transaction
+- `POST /api/v1/transactions/transfer` - Transfer money between accounts
+- `POST /api/v1/transactions/deposit` - Deposit money
+- `POST /api/v1/transactions/withdraw` - Withdraw money
+- `GET /api/v1/transactions` - Get all transactions
+- `GET /api/v1/transactions/{id}` - Get transaction by ID
+- `GET /api/v1/transactions/reference/{reference}` - Get transaction by reference
+- `GET /api/v1/transactions/account/{accountId}` - Get account transactions
+- `GET /api/v1/transactions/customer/{customerId}` - Get customer transactions
+- `GET /api/v1/transactions/account/{accountId}/date-range` - Get transactions by date range
+- `GET /api/v1/transactions/account/{accountId}/balance` - Get current balance
+- `GET /api/v1/transactions/account/{accountId}/large?minAmount={amount}` - Get large transactions
+- `PATCH /api/v1/transactions/{id}/cancel` - Cancel transaction
+- `POST /api/v1/transactions/populate` - Generate test transactions
 
-## Booting Up the Application
-For simplicity's sake, I prefer to use the command line when trying something new but you can google on how to set up a maven project in your favorite IDE.. 😉
-<ol>
-<li>Clone the repository:</li>
-  <code>git clone https://github.com/davidarchanjo/spring-boot-crud-rest</code>
-<li>Navigate to the folder:</li>
-  <code>cd spring-boot-crud-rest</code>
-<li>Run the application:</li>
-  <code>mvn spring-boot:run</code>
-</ol>
+## UK Banking Compliance Features
 
+### Customer Data Validation
+- **Phone Numbers**: UK format validation (+44xxxxxxxxxx)
+- **Postcodes**: UK postcode format validation
+- **National Insurance Numbers**: UK NI number format validation (2 letters, 6 digits, 1 letter)
+- **Email**: Standard email validation
+- **Age Verification**: Date of birth validation for legal age requirements
+
+### Account Features
+- **UK Sort Codes**: Standard 6-digit sort codes (40-00-01 for our bank)
+- **Account Numbers**: 8-digit account numbers with uniqueness validation
+- **Account Types**: Current, Savings, ISA, Business, and Joint accounts
+- **Overdraft Management**: Configurable overdraft limits
+- **Interest Rates**: Account-specific interest rate management
+
+### Transaction Types
+- **Deposits**: Cash and electronic deposits
+- **Withdrawals**: ATM and branch withdrawals
+- **Transfers**: Internal and external transfers
+- **Direct Debits**: Automated payment processing
+- **Standing Orders**: Recurring payment setup
+- **Card Payments**: Debit and credit card transactions
+- **Interest Credits**: Automatic interest calculations
+- **Fee Debits**: Account maintenance and transaction fees
+
+## Getting Started
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/sunitakumari11112002-boop/spring-boot-rest.git
+cd spring-boot-rest
+```
+
+### 2. Build the Project
+```bash
+mvn clean install
+```
+
+### 3. Run the Application
+```bash
+mvn spring-boot:run
+```
+
+### 4. Access the API
+- **Base URL**: http://localhost:8080
+- **H2 Console**: http://localhost:8080/h2-console
+- **API Documentation**: Available through the REST endpoints listed above
+
+### 5. Populate Test Data
+```bash
+# Create test customers
+POST http://localhost:8080/api/v1/customers/populate
+
+# Create test accounts
+POST http://localhost:8080/api/v1/accounts/populate
+
+# Create test transactions
+POST http://localhost:8080/api/v1/transactions/populate
+```
+
+## Example Usage
+
+### Create a New Customer
+```json
+POST /api/v1/customers
+{
+    "firstName": "John",
+    "lastName": "Smith",
+    "email": "john.smith@example.com",
+    "phoneNumber": "+447911123456",
+    "dateOfBirth": "1985-06-15",
+    "address": "123 High Street, London",
+    "postcode": "SW1A 1AA",
+    "nationalInsuranceNumber": "AB123456C"
+}
+```
+
+### Create a Bank Account
+```json
+POST /api/v1/accounts
+{
+    "accountType": "CURRENT",
+    "initialDeposit": 1000.00,
+    "overdraftLimit": 500.00,
+    "customerId": 1
+}
+```
+
+### Transfer Money
+```bash
+POST /api/v1/transactions/transfer?fromAccountId=1&toAccountNumber=87654321&toSortCode=40-00-01&amount=250.00&reference=Rent&payeeName=Landlord
+```
+
+## Database Schema
+The system uses H2 in-memory database with the following main tables:
+- **customers**: Customer personal information
+- **bank_accounts**: Account details and balances
+- **transactions**: Transaction records and audit trail
+
+## Security Features
+- Account status management (Active, Frozen, Closed)
+- Transaction validation and fraud prevention
+- Balance and overdraft limit enforcement
+- Audit trail for all operations
+- Input validation for UK-specific data formats
 
 ## Testing
-1. `Create New App`
-- URL: http://127.0.0.1:8080/api/v1/apps
-- HTTP Method: POST
-- Body:
-  ````json
-  {
-    "appName": "netflix",
-    "appVersion": "0.0.0",
-    "devName": "David Archanjo"
-  }
-  ````
-  ![createNewApp](./assets/createNewApp.jpg)
-  **NOTE:** According to [RFC standard](https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html), we should return a 201 HTTP status on creating the request resource successfully. In most of the applications the id of the newly created resource is generated, so it is a good practice to return it. To do so, the newly created resource can be referenced by the URI(s) returned in the entity of the response, with the most specific URI for the resource given by a `Location` header field. According to outlined in the screenshot, it returns accordingly at the response header.
+Run the test suite:
+```bash
+mvn test
+```
 
-2. `Get App by ID`
-- URL: http://127.0.0.1:8080/api/v1/apps/{appId} 
-- HTTP Method: GET
-  ![getAppById](./assets/getAppById.jpg)
-  **NOTE:** According to outlined in the screenshot, we are using the URI provided in the header from the response of the previous request.
+## Contributing
+This project is designed for UK financial services. When contributing:
+1. Ensure UK banking compliance
+2. Follow the existing architecture pattern
+3. Add appropriate validation for financial data
+4. Include comprehensive tests
+5. Update documentation for new features
 
-3. `Update App`
-- HTTP Method: PUT
-- URL: http://127.0.0.1:8080/api/v1/apps/{appId}
-- Body:
-  ````json
-  {
-    "appName": "netflix",
-    "appVersion": "1.0.0",
-    "devName": "David Archanjo"
-  }
-  ````
-  ![updateApp](./assets/updateApp.jpg)
-  **NOTE:** According to [RFC 2616](http://www.w3.org/Protocols/rfc2616/rfc2616.html) at [Section 9.6](http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.6), for a response with ***no body*** upon a successful PUT request, it should be returned a 204 HTTP status code, according to outlined in the screenshot.
-  
-4. `Delete App`
-- HTTP Method: DELETE
-- URL: http://127.0.0.1:8080/api/v1/apps/{appId}
-  ![banner](./assets/deleteApp.jpg)
-  
-  If we try to look up the deleted application by its id we will get an HTTP 404 status code response:
-  ![banner](./assets/getAppById404.jpg)
-
-
-## Unit Test
-Unit tests are a must for any business application, regardless of its complexity and size. Therefore, to demonstrate some of the functionality from the combination of **JUnit 5** + **Mockito** + **Hamcrest**, some [controller](./src/test/java/br/com/example/davidarchanjo/controller) and [integration](./src/test/java/br/com/example/davidarchanjo/integration) tests were implemented. You can check them by going to the [📁 test](./src/test/java/br/com/example/davidarchanjo) folder. To execute the tests, from the project root, run:
-````bash
-$ mvn test
-````
-
-
-## That's All Folks
-I aimed to pass as much of what I consider to be the most basic in a Spring Boot CRUD application. It is obvious that a lot was left out in order to not detract from the purpose of being a **sample project**.
+## License
+This project is licensed under the MIT License.
