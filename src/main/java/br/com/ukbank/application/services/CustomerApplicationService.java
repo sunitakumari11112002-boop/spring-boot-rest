@@ -1,47 +1,43 @@
 package br.com.ukbank.application.services;
 
-import br.com.ukbank.domain.model.Customer;
+import br.com.ukbank.application.dto.*;
+import br.com.ukbank.application.exceptions.*;
 import br.com.ukbank.domain.events.CustomerRegisteredEvent;
+import br.com.ukbank.domain.model.Customer;
 import br.com.ukbank.infrastructure.repositories.CustomerRepository;
-import br.com.ukbank.application.dto.CustomerRegistrationRequest;
-import br.com.ukbank.application.dto.CustomerResponse;
-import br.com.ukbank.application.dto.CustomerUpdateRequest;
-import br.com.ukbank.application.exceptions.CustomerNotFoundException;
-import br.com.ukbank.application.exceptions.DuplicateCustomerException;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Application Service for Customer operations
- * Orchestrates domain objects and handles cross-cutting concerns
+ * Application service for customer operations
+ * Coordinates domain logic and manages transactions
  */
 @Service
-@Transactional
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class CustomerApplicationService {
 
     private final CustomerRepository customerRepository;
     private final DomainEventPublisher eventPublisher;
 
     /**
-     * Register a new customer with validation and event publishing
+     * Registers a new customer
      */
     public CustomerResponse registerCustomer(CustomerRegistrationRequest request) {
         log.info("Registering new customer with email: {}", request.getEmail());
 
-        // Business rule validation
-        if (customerRepository.existsByEmail(request.getEmail())) {
-            throw new DuplicateCustomerException("Customer with email already exists: " + request.getEmail());
+        // Check if customer already exists
+        if (customerRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new DuplicateCustomerException("Customer with email " + request.getEmail() + " already exists");
         }
 
-        if (customerRepository.existsByNationalInsuranceNumber(request.getNationalInsuranceNumber())) {
+        if (customerRepository.findByNationalInsuranceNumber(request.getNationalInsuranceNumber()).isPresent()) {
             throw new DuplicateCustomerException("Customer with NI number already exists");
         }
 

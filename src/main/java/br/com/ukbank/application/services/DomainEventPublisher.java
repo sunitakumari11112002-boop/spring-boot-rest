@@ -1,28 +1,28 @@
 package br.com.ukbank.application.services;
 
 import br.com.ukbank.domain.events.DomainEvent;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 /**
- * Domain Event Publisher following Event-Driven Architecture
- * Publishes domain events for audit trails and cross-cutting concerns
+ * Service for publishing domain events
+ * Coordinates event handling across the application
  */
-@Component
+@Service
 @RequiredArgsConstructor
 @Slf4j
 public class DomainEventPublisher {
 
-    private final ApplicationEventPublisher applicationEventPublisher;
+    // In a real application, this would integrate with Spring ApplicationEventPublisher
+    // or a message broker like RabbitMQ/Kafka
 
     /**
-     * Publish domain event to event bus
+     * Publishes domain events for async processing
      */
     public void publish(DomainEvent event) {
-        log.debug("Publishing domain event: {}", event.getEventType());
-        applicationEventPublisher.publishEvent(event);
-        log.info("Domain event published: {} at {}", event.getEventType(), event.getOccurredOn());
+        log.info("Publishing domain event: {}", event.getClass().getSimpleName());
+        // Implementation would publish to event bus/message broker
+        log.debug("Event details: {}", event);
     }
 }

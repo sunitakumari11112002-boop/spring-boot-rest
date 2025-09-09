@@ -1,20 +1,24 @@
 package br.com.ukbank.domain.valueobjects;
 
-import javax.persistence.Column;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+
 import javax.persistence.Embeddable;
+import java.util.Objects;
 
 /**
- * Value Object for personal names
- * Made public for access from application layer
+ * Value object representing a person's full name
+ * Immutable and self-validating
  */
 @Embeddable
+@Getter
+@EqualsAndHashCode
 public class PersonalName {
-    @Column(nullable = false, length = 50)
-    private String firstName;
 
-    @Column(nullable = false, length = 50)
+    private String firstName;
     private String lastName;
 
+    // Default constructor for JPA
     protected PersonalName() {}
 
     private PersonalName(String firstName, String lastName) {
@@ -26,14 +30,22 @@ public class PersonalName {
         return new PersonalName(firstName, lastName);
     }
 
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
+
     private String validateName(String name, String fieldName) {
-        if (name == null || name.trim().isEmpty() || name.length() > 50) {
-            throw new IllegalArgumentException(fieldName + " is required and must not exceed 50 characters");
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException(fieldName + " cannot be null or empty");
+        }
+        if (name.length() > 50) {
+            throw new IllegalArgumentException(fieldName + " cannot exceed 50 characters");
         }
         return name.trim();
     }
 
-    public String getFirstName() { return firstName; }
-    public String getLastName() { return lastName; }
-    public String getFullName() { return firstName + " " + lastName; }
+    @Override
+    public String toString() {
+        return getFullName();
+    }
 }

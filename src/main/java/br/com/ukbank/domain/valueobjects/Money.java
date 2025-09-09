@@ -1,41 +1,45 @@
 package br.com.ukbank.domain.valueobjects;
 
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotNull;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+
+import javax.persistence.Embeddable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
 /**
- * Value Object representing monetary amounts in GBP
- * Ensures immutability and proper decimal handling for banking operations
+ * Value object representing monetary amounts with currency
+ * Immutable and self-validating
  */
-public final class Money {
+@Embeddable
+@Getter
+@EqualsAndHashCode
+public class Money {
 
-    private static final int SCALE = 2;
-    private static final RoundingMode ROUNDING_MODE = RoundingMode.HALF_EVEN;
+    private static final String DEFAULT_CURRENCY = "GBP";
 
-    @NotNull
-    @DecimalMin(value = "0.00", message = "Amount cannot be negative")
-    private final BigDecimal amount;
+    private BigDecimal amount;
+    private String currency;
 
-    private final String currency;
+    // Default constructor for JPA
+    protected Money() {}
 
     private Money(BigDecimal amount, String currency) {
-        this.amount = amount.setScale(SCALE, ROUNDING_MODE);
-        this.currency = currency;
-    }
-
-    public static Money pounds(BigDecimal amount) {
-        return new Money(amount, "GBP");
-    }
-
-    public static Money pounds(double amount) {
-        return new Money(BigDecimal.valueOf(amount), "GBP");
+        this.amount = amount.setScale(2, RoundingMode.HALF_UP);
+        this.currency = Objects.requireNonNull(currency, "Currency cannot be null");
     }
 
     public static Money zero() {
-        return new Money(BigDecimal.ZERO, "GBP");
+        return new Money(BigDecimal.ZERO, DEFAULT_CURRENCY);
+    }
+
+    public static Money of(BigDecimal amount) {
+        return new Money(Objects.requireNonNull(amount), DEFAULT_CURRENCY);
+    }
+
+    public static Money of(BigDecimal amount, String currency) {
+        return new Money(Objects.requireNonNull(amount), currency);
     }
 
     public Money add(Money other) {
@@ -72,29 +76,8 @@ public final class Money {
         }
     }
 
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public String getCurrency() {
-        return currency;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        Money money = (Money) obj;
-        return Objects.equals(amount, money.amount) && Objects.equals(currency, money.currency);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(amount, currency);
-    }
-
     @Override
     public String toString() {
-        return String.format("%s %.2f", currency, amount);
+        return currency + " " + amount;
     }
 }

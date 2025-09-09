@@ -1,28 +1,22 @@
 package br.com.ukbank.presentation.controllers;
 
+import br.com.ukbank.application.dto.*;
 import br.com.ukbank.application.services.CustomerApplicationService;
-import br.com.ukbank.application.dto.CustomerRegistrationRequest;
-import br.com.ukbank.application.dto.CustomerResponse;
-import br.com.ukbank.application.dto.CustomerUpdateRequest;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.validation.Valid;
-import java.net.URI;
 import java.util.List;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 /**
- * REST Controller for Customer operations following Clean Architecture
- * Handles HTTP concerns and delegates to Application Services
+ * REST Controller for customer operations
+ * Implements proper HTTP semantics and error handling
  */
 @RestController
-@RequestMapping("/api/v1/customers")
+@RequestMapping("/api/customers")
 @RequiredArgsConstructor
 @Slf4j
 public class CustomerController {
@@ -31,32 +25,24 @@ public class CustomerController {
 
     /**
      * Register a new customer
-     * POST /api/v1/customers
      */
     @PostMapping
-    public ResponseEntity<CustomerResponse> registerCustomer(
-            @Valid @RequestBody CustomerRegistrationRequest request,
-            UriComponentsBuilder uriBuilder) {
-
+    public ResponseEntity<CustomerResponse> registerCustomer(@Valid @RequestBody CustomerRegistrationRequest request) {
         log.info("Received customer registration request for email: {}", request.getEmail());
 
         CustomerResponse response = customerService.registerCustomer(request);
 
-        URI location = uriBuilder
-            .path("/api/v1/customers/{id}")
-            .buildAndExpand(response.getCustomerId())
-            .toUri();
+        log.info("Successfully registered customer with ID: {}", response.getCustomerId());
 
-        return ResponseEntity.created(location).body(response);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     /**
      * Get customer by ID
-     * GET /api/v1/customers/{id}
      */
     @GetMapping("/{customerId}")
-    public ResponseEntity<CustomerResponse> getCustomer(@PathVariable Long customerId) {
-        log.debug("Fetching customer with ID: {}", customerId);
+    public ResponseEntity<CustomerResponse> getCustomerById(@PathVariable Long customerId) {
+        log.info("Retrieving customer with ID: {}", customerId);
 
         CustomerResponse response = customerService.getCustomerById(customerId);
         return ResponseEntity.ok(response);
@@ -64,7 +50,6 @@ public class CustomerController {
 
     /**
      * Update customer information
-     * PUT /api/v1/customers/{id}
      */
     @PutMapping("/{customerId}")
     public ResponseEntity<CustomerResponse> updateCustomer(
@@ -78,12 +63,33 @@ public class CustomerController {
     }
 
     /**
+     * Suspend customer account
+     */
+    @PatchMapping("/{customerId}/suspend")
+    public ResponseEntity<Void> suspendCustomer(@PathVariable Long customerId) {
+        log.info("Suspending customer with ID: {}", customerId);
+
+        customerService.suspendCustomer(customerId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Activate suspended customer
+     */
+    @PatchMapping("/{customerId}/activate")
+    public ResponseEntity<Void> activateCustomer(@PathVariable Long customerId) {
+        log.info("Activating customer with ID: {}", customerId);
+
+        customerService.activateCustomer(customerId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
      * Search customers by name
-     * GET /api/v1/customers/search?name={name}
      */
     @GetMapping("/search")
     public ResponseEntity<List<CustomerResponse>> searchCustomers(@RequestParam String name) {
-        log.debug("Searching customers by name: {}", name);
+        log.info("Searching customers by name: {}", name);
 
         List<CustomerResponse> customers = customerService.searchCustomersByName(name);
         return ResponseEntity.ok(customers);
@@ -91,37 +97,12 @@ public class CustomerController {
 
     /**
      * Get all active customers
-     * GET /api/v1/customers
      */
     @GetMapping
     public ResponseEntity<List<CustomerResponse>> getAllActiveCustomers() {
-        log.debug("Fetching all active customers");
+        log.info("Retrieving all active customers");
 
         List<CustomerResponse> customers = customerService.getAllActiveCustomers();
         return ResponseEntity.ok(customers);
-    }
-
-    /**
-     * Suspend customer account
-     * PATCH /api/v1/customers/{id}/suspend
-     */
-    @PatchMapping("/{customerId}/suspend")
-    public ResponseEntity<Void> suspendCustomer(@PathVariable Long customerId) {
-        log.info("Suspending customer with ID: {}", customerId);
-
-        customerService.suspendCustomer(customerId);
-        return ResponseEntity.ok().build();
-    }
-
-    /**
-     * Activate suspended customer
-     * PATCH /api/v1/customers/{id}/activate
-     */
-    @PatchMapping("/{customerId}/activate")
-    public ResponseEntity<Void> activateCustomer(@PathVariable Long customerId) {
-        log.info("Activating customer with ID: {}", customerId);
-
-        customerService.activateCustomer(customerId);
-        return ResponseEntity.ok().build();
     }
 }

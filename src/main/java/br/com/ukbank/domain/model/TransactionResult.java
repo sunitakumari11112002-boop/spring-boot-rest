@@ -1,34 +1,33 @@
 package br.com.ukbank.domain.model;
 
-import br.com.ukbank.domain.events.TransactionProcessedEvent;
+import br.com.ukbank.domain.events.DomainEvent;
+import lombok.Getter;
 
 /**
  * Result object for transaction operations
- * Follows the Result pattern for handling success/failure scenarios
+ * Encapsulates success/failure state and domain events
  */
+@Getter
 public class TransactionResult {
+
     private final boolean success;
     private final String transactionReference;
     private final String errorMessage;
-    private final TransactionProcessedEvent event;
+    private final DomainEvent domainEvent;
 
-    private TransactionResult(boolean success, String transactionReference, String errorMessage, TransactionProcessedEvent event) {
+    private TransactionResult(boolean success, String transactionReference,
+                             String errorMessage, DomainEvent domainEvent) {
         this.success = success;
         this.transactionReference = transactionReference;
         this.errorMessage = errorMessage;
-        this.event = event;
+        this.domainEvent = domainEvent;
     }
 
-    public static TransactionResult success(String transactionReference, TransactionProcessedEvent event) {
-        return new TransactionResult(true, transactionReference, null, event);
+    public static TransactionResult success(String transactionReference, DomainEvent domainEvent) {
+        return new TransactionResult(true, transactionReference, null, domainEvent);
     }
 
     public static TransactionResult failure(String errorMessage) {
         return new TransactionResult(false, null, errorMessage, null);
     }
-
-    public boolean isSuccess() { return success; }
-    public String getTransactionReference() { return transactionReference; }
-    public String getErrorMessage() { return errorMessage; }
-    public TransactionProcessedEvent getEvent() { return event; }
 }

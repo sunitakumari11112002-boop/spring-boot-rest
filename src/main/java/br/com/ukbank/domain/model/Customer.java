@@ -19,6 +19,15 @@ import java.util.Objects;
 @Table(name = "customers")
 public class Customer {
 
+    /**
+     * Customer status enumeration
+     */
+    public enum CustomerStatus {
+        ACTIVE,
+        SUSPENDED,
+        CLOSED
+    }
+
     // Getters
     @Getter
     @Id
@@ -165,10 +174,6 @@ public class Customer {
     }
 
     public List<BankAccount> getBankAccounts() { return Collections.unmodifiableList(bankAccounts); }
-
-    public enum CustomerStatus {
-        ACTIVE, SUSPENDED, CLOSED
-    }
 
     @Override
     public boolean equals(Object obj) {

@@ -1,30 +1,26 @@
 package br.com.ukbank.application.services;
 
-import br.com.ukbank.domain.model.BankAccount;
-import br.com.ukbank.domain.model.Customer;
-import br.com.ukbank.domain.model.TransactionResult;
-import br.com.ukbank.domain.valueobjects.Money;
-import br.com.ukbank.infrastructure.repositories.BankAccountRepository;
-import br.com.ukbank.infrastructure.repositories.CustomerRepository;
 import br.com.ukbank.application.dto.*;
 import br.com.ukbank.application.exceptions.*;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import br.com.ukbank.domain.model.*;
+import br.com.ukbank.domain.valueobjects.Money;
+import br.com.ukbank.infrastructure.repositories.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Application Service for Banking Account operations
- * Implements Command Query Responsibility Segregation (CQRS) pattern
+ * Application service for banking account operations
+ * Coordinates domain logic and manages transactions
  */
 @Service
-@Transactional
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class BankingAccountService {
 
     private final BankAccountRepository accountRepository;
@@ -32,19 +28,18 @@ public class BankingAccountService {
     private final DomainEventPublisher eventPublisher;
 
     /**
-     * Open a new bank account for customer
+     * Opens a new bank account
      */
     public BankAccountResponse openAccount(AccountOpeningRequest request) {
-        log.info("Opening new {} account for customer: {}",
-                request.getAccountType(), request.getCustomerId());
+        log.info("Opening {} account for customer ID: {}", request.getAccountType(), request.getCustomerId());
 
         Customer customer = customerRepository.findById(request.getCustomerId())
             .orElseThrow(() -> new CustomerNotFoundException("Customer not found: " + request.getCustomerId()));
 
-        Money initialDeposit = request.getInitialDeposit() != null ?
-            Money.pounds(request.getInitialDeposit()) : Money.zero();
-        Money overdraftLimit = request.getOverdraftLimit() != null ?
-            Money.pounds(request.getOverdraftLimit()) : null;
+        Money initialDeposit = request.getInitialDeposit() != null
+            ? Money.of(request.getInitialDeposit()) : null;
+        Money overdraftLimit = request.getOverdraftLimit() != null
+            ? Money.of(request.getOverdraftLimit()) : null;
 
         // Use domain factory method
         BankAccount account = BankAccount.openAccount(
@@ -61,61 +56,54 @@ public class BankingAccountService {
     }
 
     /**
-     * Process money transfer between accounts
+     * Processes money transfer between accounts
      */
-    public TransferResponse processTransfer(MoneyTransferRequest request) {
-        log.info("Processing transfer from account {} to {}-{}",
-                request.getFromAccountId(), request.getToSortCode(), request.getToAccountNumber());
+    public TransferResponse transferMoney(MoneyTransferRequest request) {
+        log.info("Processing transfer from account ID {} to {}-{}",
+            request.getFromAccountId(), request.getToSortCode(), request.getToAccountNumber());
 
         BankAccount fromAccount = accountRepository.findById(request.getFromAccountId())
-            .orElseThrow(() -> new BankAccountNotFoundException("Source account not found"));
+            .orElseThrow(() -> new BankAccountNotFoundException("From account not found"));
 
-        Money transferAmount = Money.pounds(request.getAmount());
+        Money transferAmount = Money.of(request.getAmount());
 
-        // Use domain method for business logic
-        TransactionResult result = fromAccount.processDebit(
-            transferAmount,
-            "Transfer to " + request.getPayeeName(),
-            request.getReference()
-        );
+        // Process debit on source account
+        String description = "Transfer to " + request.getPayeeName();
+        String reference = request.getReference();
 
-        if (!result.isSuccess()) {
-            throw new InsufficientFundsException(result.getErrorMessage());
+        TransactionResult debitResult = fromAccount.processDebit(transferAmount, description, reference);
+
+        if (!debitResult.isSuccess()) {
+            throw new InsufficientFundsException(debitResult.getErrorMessage());
         }
 
+        // Save the account state
         accountRepository.save(fromAccount);
 
         // Publish domain event
-        eventPublisher.publish(result.getEvent());
+        if (debitResult.getDomainEvent() != null) {
+            eventPublisher.publish(debitResult.getDomainEvent());
+        }
 
-        log.info("Successfully processed transfer with reference: {}", result.getTransactionReference());
+        log.info("Successfully processed transfer with reference: {}", debitResult.getTransactionReference());
+
         return TransferResponse.builder()
-            .transactionReference(result.getTransactionReference())
+            .transactionReference(debitResult.getTransactionReference())
             .status("COMPLETED")
-            .fromAccountBalance(fromAccount.getBalance().getAmount())
+            .fromAccountId(request.getFromAccountId())
+            .amount(request.getAmount())
+            .payeeName(request.getPayeeName())
+            .reference(request.getReference())
             .build();
     }
 
     /**
-     * Freeze account for security purposes
-     */
-    public void freezeAccount(Long accountId, String reason) {
-        log.info("Freezing account: {} for reason: {}", accountId, reason);
-
-        BankAccount account = accountRepository.findById(accountId)
-            .orElseThrow(() -> new BankAccountNotFoundException("Account not found: " + accountId));
-
-        account.freeze(reason);
-        accountRepository.save(account);
-
-        log.info("Successfully froze account: {}", accountId);
-    }
-
-    /**
-     * Get account details by ID
+     * Retrieves account details by ID
      */
     @Transactional(readOnly = true)
     public BankAccountResponse getAccountById(Long accountId) {
+        log.info("Retrieving account details for ID: {}", accountId);
+
         BankAccount account = accountRepository.findById(accountId)
             .orElseThrow(() -> new BankAccountNotFoundException("Account not found: " + accountId));
 
@@ -123,24 +111,13 @@ public class BankingAccountService {
     }
 
     /**
-     * Get all accounts for a customer
+     * Gets all accounts for a customer
      */
     @Transactional(readOnly = true)
-    public List<BankAccountResponse> getCustomerAccounts(Long customerId) {
-        List<BankAccount> accounts = accountRepository.findByCustomerCustomerId(customerId);
+    public List<BankAccountResponse> getAccountsByCustomerId(Long customerId) {
+        log.info("Retrieving accounts for customer ID: {}", customerId);
 
-        return accounts.stream()
-            .map(BankAccountResponse::from)
-            .collect(Collectors.toList());
-    }
-
-    /**
-     * Get accounts with low balance
-     */
-    @Transactional(readOnly = true)
-    public List<BankAccountResponse> getLowBalanceAccounts(double thresholdAmount) {
-        Money threshold = Money.pounds(thresholdAmount);
-        List<BankAccount> accounts = accountRepository.findAccountsWithBalanceBelow(threshold);
+        List<BankAccount> accounts = accountRepository.findByCustomerId(customerId);
 
         return accounts.stream()
             .map(BankAccountResponse::from)

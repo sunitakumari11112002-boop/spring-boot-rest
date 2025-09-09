@@ -1,78 +1,59 @@
 package br.com.ukbank.domain.valueobjects;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
-import java.util.Objects;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+
+import javax.persistence.Embeddable;
+import java.util.regex.Pattern;
 
 /**
- * Value Object representing UK bank account identifiers
- * Encapsulates account number and sort code with UK banking validation
+ * Value object representing UK sort codes and account numbers
+ * Immutable and self-validating following UK banking standards
  */
-public final class AccountIdentifier {
+@Embeddable
+@Getter
+@EqualsAndHashCode
+public class AccountIdentifier {
 
-    @NotBlank
-    @Pattern(regexp = "^[0-9]{8}$", message = "Account number must be 8 digits")
-    private final String accountNumber;
+    private static final Pattern SORT_CODE_PATTERN = Pattern.compile("^[0-9]{2}-[0-9]{2}-[0-9]{2}$");
+    private static final Pattern ACCOUNT_NUMBER_PATTERN = Pattern.compile("^[0-9]{8}$");
 
-    @NotBlank
-    @Pattern(regexp = "^[0-9]{2}-[0-9]{2}-[0-9]{2}$", message = "Sort code must be in format XX-XX-XX")
-    private final String sortCode;
+    private String sortCode;
+    private String accountNumber;
 
-    private AccountIdentifier(String accountNumber, String sortCode) {
-        this.accountNumber = accountNumber;
-        this.sortCode = sortCode;
-    }
+    // Default constructor for JPA
+    protected AccountIdentifier() {}
 
-    public static AccountIdentifier of(String accountNumber, String sortCode) {
-        validateAccountNumber(accountNumber);
-        validateSortCode(sortCode);
-        return new AccountIdentifier(accountNumber, sortCode);
+    private AccountIdentifier(String sortCode, String accountNumber) {
+        this.sortCode = validateSortCode(sortCode);
+        this.accountNumber = validateAccountNumber(accountNumber);
     }
 
     public static AccountIdentifier ukBankAccount(String accountNumber) {
-        return new AccountIdentifier(accountNumber, "40-00-01");
+        // Generate standard UK bank sort code (for demo purposes)
+        return new AccountIdentifier("12-34-56", accountNumber);
     }
 
-    private static void validateAccountNumber(String accountNumber) {
-        if (accountNumber == null || !accountNumber.matches("^[0-9]{8}$")) {
-            throw new IllegalArgumentException("Invalid account number format");
+    public static AccountIdentifier of(String sortCode, String accountNumber) {
+        return new AccountIdentifier(sortCode, accountNumber);
+    }
+
+    private String validateSortCode(String sortCode) {
+        if (sortCode == null || !SORT_CODE_PATTERN.matcher(sortCode).matches()) {
+            throw new IllegalArgumentException("Invalid UK sort code format. Expected: XX-XX-XX");
         }
-    }
-
-    private static void validateSortCode(String sortCode) {
-        if (sortCode == null || !sortCode.matches("^[0-9]{2}-[0-9]{2}-[0-9]{2}$")) {
-            throw new IllegalArgumentException("Invalid sort code format");
-        }
-    }
-
-    public String getAccountNumber() {
-        return accountNumber;
-    }
-
-    public String getSortCode() {
         return sortCode;
     }
 
-    public String getFormattedIdentifier() {
-        return String.format("%s %s", sortCode, accountNumber);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        AccountIdentifier that = (AccountIdentifier) obj;
-        return Objects.equals(accountNumber, that.accountNumber) &&
-               Objects.equals(sortCode, that.sortCode);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(accountNumber, sortCode);
+    private String validateAccountNumber(String accountNumber) {
+        if (accountNumber == null || !ACCOUNT_NUMBER_PATTERN.matcher(accountNumber).matches()) {
+            throw new IllegalArgumentException("Invalid UK account number format. Expected: 8 digits");
+        }
+        return accountNumber;
     }
 
     @Override
     public String toString() {
-        return getFormattedIdentifier();
+        return sortCode + " " + accountNumber;
     }
 }
