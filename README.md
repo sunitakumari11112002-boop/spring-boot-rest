@@ -1,6 +1,6 @@
 # UK Banking System - Spring Boot REST API 🏦
 
-![Java](https://img.shields.io/badge/Java-8%2B-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.7%2B-brightgreen) ![DDD](https://img.shields.io/badge/Architecture-DDD-blue) ![License](https://img.shields.io/badge/License-MIT-yellow)
+![Java](https://img.shields.io/badge/Java-8%2B-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.7%2B-brightgreen) ![DDD](https://img.shields.io/badge/Architecture-DDD-blue)
 
 ## 📋 Table of Contents
 - [Executive Summary](#executive-summary)
@@ -1008,10 +1008,6 @@ public class DatabaseHealthIndicator implements HealthIndicator {
 - [Spring Boot Reference](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/)
 - [Domain-Driven Design](https://domainlanguage.com/ddd/)
 - [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
-
-## 📋 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 👥 Contributing
 
