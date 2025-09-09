@@ -898,8 +898,7 @@ public class DatabaseHealthIndicator implements HealthIndicator {
 
 ### Development Guidelines
 1. Follow Domain-Driven Design principles
-2. Maintain high test coverage (>80%)
-3. Adhere to UK banking regulations
+2. Adhere to UK banking regulations
 4. Use conventional commit messages
 5. Update documentation for new features
 
