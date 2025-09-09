@@ -1025,5 +1025,3 @@ public class DatabaseHealthIndicator implements HealthIndicator {
 - SOLID design principles
 
 ---
-
-**UK Banking System** - Developed with ❤️ for secure and compliant banking operations.
