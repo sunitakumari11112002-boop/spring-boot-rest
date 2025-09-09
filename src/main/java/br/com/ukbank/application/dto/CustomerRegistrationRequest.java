@@ -1,0 +1,47 @@
+package br.com.ukbank.application.dto;
+
+import javax.validation.constraints.*;
+import java.time.LocalDate;
+import lombok.Data;
+import lombok.Builder;
+
+/**
+ * Request DTO for customer registration
+ * Implements validation and data transfer patterns
+ */
+@Data
+@Builder
+public class CustomerRegistrationRequest {
+
+    @NotBlank(message = "First name is required")
+    @Size(max = 50, message = "First name must not exceed 50 characters")
+    private String firstName;
+
+    @NotBlank(message = "Last name is required")
+    @Size(max = 50, message = "Last name must not exceed 50 characters")
+    private String lastName;
+
+    @Email(message = "Invalid email format")
+    @NotBlank(message = "Email is required")
+    private String email;
+
+    @Pattern(regexp = "^\\+44[0-9]{10}$", message = "Invalid UK phone number format (+44xxxxxxxxxx)")
+    @NotBlank(message = "Phone number is required")
+    private String phoneNumber;
+
+    @NotNull(message = "Date of birth is required")
+    @Past(message = "Date of birth must be in the past")
+    private LocalDate dateOfBirth;
+
+    @NotBlank(message = "Address is required")
+    @Size(max = 200, message = "Address must not exceed 200 characters")
+    private String addressLine;
+
+    @NotBlank(message = "Postcode is required")
+    @Pattern(regexp = "^[A-Z]{1,2}[0-9R][0-9A-Z]? [0-9][A-Z]{2}$", message = "Invalid UK postcode format")
+    private String postcode;
+
+    @NotBlank(message = "National Insurance Number is required")
+    @Pattern(regexp = "^[A-Z]{2}[0-9]{6}[A-Z]$", message = "Invalid UK National Insurance Number format")
+    private String nationalInsuranceNumber;
+}
