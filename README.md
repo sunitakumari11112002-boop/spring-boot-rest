@@ -1,4 +1,4 @@
-# UK Banking System - Spring Boot REST API 🏦
+# Banking System - Spring Boot REST API 🏦
 
 ![Java](https://img.shields.io/badge/Java-8%2B-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.7%2B-brightgreen) ![DDD](https://img.shields.io/badge/Architecture-DDD-blue)
 
