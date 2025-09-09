@@ -16,9 +16,7 @@
 - [Deployment Guide](#deployment-guide)
 
 ## 🎯 Executive Summary
-
-### System Purpose
-The UK Banking System is a **Domain-Driven Design (DDD)** compliant Spring Boot REST API designed specifically for UK financial institutions. It implements core banking operations with strict adherence to UK banking regulations, including GDPR compliance, FCA guidelines, and PCI DSS standards.
+This project implements a comprehensive UK banking system using Spring Boot and follows Domain-Driven Design (DDD) principles. It provides RESTful APIs for managing customers, bank accounts, and transactions, with a focus on UK-specific requirements such as National Insurance numbers, postcodes, and phone number formats.
 
 ### Key Business Capabilities
 - **Customer Lifecycle Management**: Complete customer onboarding, KYC validation, and account management
