@@ -2,6 +2,7 @@ package br.com.ukbank.application.services;
 
 import br.com.ukbank.domain.model.BankAccount;
 import br.com.ukbank.domain.model.Customer;
+import br.com.ukbank.domain.model.TransactionResult;
 import br.com.ukbank.domain.valueobjects.Money;
 import br.com.ukbank.infrastructure.repositories.BankAccountRepository;
 import br.com.ukbank.infrastructure.repositories.CustomerRepository;

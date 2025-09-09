@@ -1,10 +1,9 @@
-package com.ukbank.presentation.controllers;
+package br.com.ukbank.presentation.controllers;
 
-import com.ukbank.application.services.CustomerApplicationService;
-import com.ukbank.application.dto.CustomerRegistrationRequest;
-import com.ukbank.application.dto.CustomerResponse;
-import com.ukbank.application.dto.CustomerUpdateRequest;
-import com.ukbank.domain.model.Customer;
+import br.com.ukbank.application.services.CustomerApplicationService;
+import br.com.ukbank.application.dto.CustomerRegistrationRequest;
+import br.com.ukbank.application.dto.CustomerResponse;
+import br.com.ukbank.application.dto.CustomerUpdateRequest;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

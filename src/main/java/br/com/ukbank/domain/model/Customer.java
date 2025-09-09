@@ -1,10 +1,9 @@
 package br.com.ukbank.domain.model;
 
 import br.com.ukbank.domain.valueobjects.*;
-import br.com.ukbank.domain.events.CustomerRegisteredEvent;
+import lombok.Getter;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,10 +19,13 @@ import java.util.Objects;
 @Table(name = "customers")
 public class Customer {
 
+    // Getters
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long customerId;
 
+    @Getter
     @Embedded
     @AttributeOverrides({
         @AttributeOverride(name = "firstName", column = @Column(name = "first_name")),
@@ -31,16 +33,20 @@ public class Customer {
     })
     private PersonalName personalName;
 
+    @Getter
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Getter
     @Embedded
     @AttributeOverride(name = "number", column = @Column(name = "phone_number"))
     private UKPhoneNumber phoneNumber;
 
+    @Getter
     @Column(nullable = false)
     private LocalDate dateOfBirth;
 
+    @Getter
     @Embedded
     @AttributeOverrides({
         @AttributeOverride(name = "addressLine", column = @Column(name = "address_line")),
@@ -48,17 +54,21 @@ public class Customer {
     })
     private UKAddress address;
 
+    @Getter
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "national_insurance_number"))
     private NationalInsuranceNumber nationalInsuranceNumber;
 
+    @Getter
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CustomerStatus status;
 
+    @Getter
     @Column(nullable = false)
     private LocalDateTime registeredAt;
 
+    @Getter
     private LocalDateTime lastUpdatedAt;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -82,7 +92,6 @@ public class Customer {
 
     /**
      * Factory method for creating new customers
-     * Validates business rules and creates domain event
      */
     public static Customer registerNewCustomer(String firstName, String lastName, String email,
                                              String phoneNumber, LocalDate dateOfBirth,
@@ -93,10 +102,7 @@ public class Customer {
         UKAddress addr = UKAddress.of(addressLine, postcode);
         NationalInsuranceNumber niNumber = NationalInsuranceNumber.of(nin);
 
-        Customer customer = new Customer(name, email, phone, dateOfBirth, addr, niNumber);
-
-        // Domain event will be published by the service layer
-        return customer;
+        return new Customer(name, email, phone, dateOfBirth, addr, niNumber);
     }
 
     /**
@@ -158,17 +164,6 @@ public class Customer {
         return dateOfBirth;
     }
 
-    // Getters
-    public Long getCustomerId() { return customerId; }
-    public PersonalName getPersonalName() { return personalName; }
-    public String getEmail() { return email; }
-    public UKPhoneNumber getPhoneNumber() { return phoneNumber; }
-    public LocalDate getDateOfBirth() { return dateOfBirth; }
-    public UKAddress getAddress() { return address; }
-    public NationalInsuranceNumber getNationalInsuranceNumber() { return nationalInsuranceNumber; }
-    public CustomerStatus getStatus() { return status; }
-    public LocalDateTime getRegisteredAt() { return registeredAt; }
-    public LocalDateTime getLastUpdatedAt() { return lastUpdatedAt; }
     public List<BankAccount> getBankAccounts() { return Collections.unmodifiableList(bankAccounts); }
 
     public enum CustomerStatus {
@@ -187,38 +182,4 @@ public class Customer {
     public int hashCode() {
         return Objects.hash(customerId);
     }
-}
-
-/**
- * Value Object for personal names
- */
-@Embeddable
-class PersonalName {
-    @Column(nullable = false, length = 50)
-    private String firstName;
-
-    @Column(nullable = false, length = 50)
-    private String lastName;
-
-    protected PersonalName() {}
-
-    private PersonalName(String firstName, String lastName) {
-        this.firstName = validateName(firstName, "First name");
-        this.lastName = validateName(lastName, "Last name");
-    }
-
-    public static PersonalName of(String firstName, String lastName) {
-        return new PersonalName(firstName, lastName);
-    }
-
-    private String validateName(String name, String fieldName) {
-        if (name == null || name.trim().isEmpty() || name.length() > 50) {
-            throw new IllegalArgumentException(fieldName + " is required and must not exceed 50 characters");
-        }
-        return name.trim();
-    }
-
-    public String getFirstName() { return firstName; }
-    public String getLastName() { return lastName; }
-    public String getFullName() { return firstName + " " + lastName; }
 }

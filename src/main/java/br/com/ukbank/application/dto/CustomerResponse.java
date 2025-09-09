@@ -3,6 +3,8 @@ package br.com.ukbank.application.dto;
 import br.com.ukbank.domain.model.Customer;
 import lombok.Data;
 import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -12,6 +14,8 @@ import java.time.LocalDateTime;
  */
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CustomerResponse {
 
     private Long customerId;
@@ -50,18 +54,4 @@ public class CustomerResponse {
             .numberOfAccounts(customer.getBankAccounts().size())
             .build();
     }
-}
-
-/**
- * Request DTO for customer updates
- */
-@Data
-@Builder
-public class CustomerUpdateRequest {
-    private String firstName;
-    private String lastName;
-    private String email;
-    private String phoneNumber;
-    private String addressLine;
-    private String postcode;
 }

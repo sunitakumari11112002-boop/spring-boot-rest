@@ -3,14 +3,18 @@ package br.com.ukbank.application.dto;
 import br.com.ukbank.domain.model.BankAccount;
 import lombok.Data;
 import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * Banking Account DTOs with proper validation and mapping
+ * Response DTO for Banking Account information
  */
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class BankAccountResponse {
 
     private Long accountId;
@@ -42,35 +46,4 @@ public class BankAccountResponse {
             .customerId(account.getCustomer().getCustomerId())
             .build();
     }
-}
-
-@Data
-@Builder
-public class AccountOpeningRequest {
-
-    private Long customerId;
-    private BankAccount.AccountType accountType;
-    private BigDecimal initialDeposit;
-    private BigDecimal overdraftLimit;
-}
-
-@Data
-@Builder
-public class MoneyTransferRequest {
-
-    private Long fromAccountId;
-    private String toAccountNumber;
-    private String toSortCode;
-    private BigDecimal amount;
-    private String payeeName;
-    private String reference;
-}
-
-@Data
-@Builder
-public class TransferResponse {
-
-    private String transactionReference;
-    private String status;
-    private BigDecimal fromAccountBalance;
 }

@@ -4,6 +4,8 @@ import javax.validation.constraints.*;
 import java.time.LocalDate;
 import lombok.Data;
 import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 /**
  * Request DTO for customer registration
@@ -11,6 +13,8 @@ import lombok.Builder;
  */
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CustomerRegistrationRequest {
 
     @NotBlank(message = "First name is required")
